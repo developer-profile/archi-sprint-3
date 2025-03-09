@@ -1,0 +1,42 @@
+@startuml
+title Smart Home System Container Diagram
+
+!include <C4/C4_Container>
+
+top to bottom direction
+
+Person(user, "Пользователь", "Пользователь Smart Home System")
+System_Boundary(system, "Smart Home System") {
+    Container(apiGateway, "АPI Gateway")
+
+    Container(telemetryService, "Телеметрия","", "Сбор данных телеметрии с устройств")
+    Container(deviceService, "Управление устройствами", "", "Управление отоплением, управление светом, управление воротами")
+    Container(userService, "Управление пользователями", "", "Сервис управления У.З. пользователей")
+
+    ContainerDb(telemetryDb, "База данных", "PostgreSQL")
+    ContainerDb(deviceDb, "База данных", "PostgreSQL")
+    ContainerDb(userDb, "База данных", "PostgreSQL")
+    ContainerQueue(kafka, "Шина данных", "Kafka")
+
+    Rel(apiGateway, telemetryService, "Получение данных телеметрии")
+    Rel(apiGateway, deviceService, Изменение состояния устройства")
+    Rel(apiGateway, userService, Создание/изменение У.З.)
+
+    Rel(deviceService, kafka, "Отправляет команды")
+    Rel_L(kafka, telemetryService, "Отправляет телеметрия")
+
+    Rel(deviceService, deviceDb, "Чтение / запись")
+    Rel(telemetryService, telemetryDb, "Чтение / запись")
+    Rel(userService, userDb, "Чтение / запись")
+
+}
+
+
+System_Ext(device, "Устройства", "API устройств")
+
+Rel(kafka, device, "Отправляет команды")
+Rel(device, kafka, "Отправляет телеметрию")
+
+Rel(user, apiGateway, "Работа с системой")
+
+@enduml
