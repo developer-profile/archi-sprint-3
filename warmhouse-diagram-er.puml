@@ -8,6 +8,12 @@ entity "User" {
     * auth_2FA : Boolean
 }
 
+entity "UserHome" {
+    * id : UUID
+    * user_id : String
+    * home_id : String
+}
+
 entity "House" {
     * id : UUID
     * address : String
@@ -47,7 +53,8 @@ entity "AutomationScenario" {
 }
 
 ' Relationships
-User ||--o{ House : "owns"
+User ||--o{ UserHome : "owns"
+UserHome }o--o{ House : "owns"
 House ||--o{ Device : "has"
 Device ||--|| DeviceType : "is of type"
 Device ||--o{ TelemetryData : "generates"
