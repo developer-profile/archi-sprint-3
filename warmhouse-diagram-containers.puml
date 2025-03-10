@@ -1,0 +1,41 @@
+@startuml
+title Smart Home System Container Diagram
+
+!include <C4/C4_Container>
+
+top to bottom direction
+
+Person(user, "Пользователь", "Пользователь Smart Home System")
+System_Boundary(system, "Smart Home System") {
+    Container(apiGateway, "АPI Gateway", "Kusk/Kong")
+
+    Container(telemetryService, "Телеметрия","", "Сбор данных телеметрии с устройств", "Java Spring Boot")
+    Container(deviceService, "Управление устройствами", "", "Управление отоплением, управление светом, управление воротами", "Java Spring Boot")
+    Container(userService, "Управление пользователями", "", "Сервис управления У.З. пользователей", "Java Spring Boot")
+
+    ContainerDb(telemetryDb, "База данных", "PostgreSQL")
+    ContainerDb(deviceDb, "База данных", "PostgreSQL")
+    ContainerDb(userDb, "База данных", "PostgreSQL")
+    ContainerQueue(kafka, "Шина данных", "Kafka")
+
+    Rel(apiGateway, telemetryService, "Получение данных телеметрии", "HTTPS/REST")
+    Rel(apiGateway, deviceService, Изменение состояния устройства", "HTTPS/REST")
+    Rel(apiGateway, userService, "Создание/изменение У.З.", "HTTPS/REST")
+
+    Rel(deviceService, kafka, "Отправляет команды", "Kafka Topic")
+    Rel_L(kafka, telemetryService, "Отправляет телеметрия", "Kafka Topic")
+
+    Rel(deviceService, deviceDb, "Чтение / запись")
+    Rel(telemetryService, telemetryDb, "Чтение / запись")
+    Rel(userService, userDb, "Чтение / запись")
+
+}
+
+
+System_Ext(device, "Устройства", "API устройств", "HTTPS/REST")
+
+Rel(kafka, device, "Отправляет команды", "Kafka Topic")
+Rel(device, kafka, "Отправляет телеметрию", "Kafka Topic")
+Rel(user, apiGateway, "Работа с системой", "HTTPS/REST")
+
+@enduml
